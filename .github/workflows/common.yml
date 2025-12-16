@@ -22,16 +22,18 @@ jobs:
     runs-on: ${{ inputs.runs_on }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Clone libmpegh
         run: git clone --depth=1 --single-branch https://github.com/ittiam-systems/libmpegh.git
 
       - name: Hotpatch code
-        working-directory: libmpegh
+        working-directory: .
         shell: bash
         run: |
-          perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' decoder/impeghd_type_def.h
-          perl -0777 -pi -e 's/add_library\s*\(\s*ia_mpeghd_lib\s+STATIC/add_library(ia_mpeghd_lib/g' CMakeLists.txt
-          cat CMakeLists.txt
+          perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' libmpegh/decoder/impeghd_type_def.h
+          cp patched/CMakeLists.txt libmpegh/CMakeLists.txt
 
       - name: Create build directory
         run: mkdir -p libmpegh/bin
