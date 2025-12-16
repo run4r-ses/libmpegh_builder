@@ -131,16 +131,8 @@ add_executable (ia_mpeghd_testbench
 	test/mp4/impeghd_mp4_video.c
 	)
 
-add_library(ia_mpeghd_lib SHARED)
+add_library(ia_mpeghd_lib)
 target_link_libraries(ia_mpeghd_lib PRIVATE ia_mpeghd_obj)
-if(MSVC)
-    set_target_properties(ia_mpeghd_lib PROPERTIES
-        WINDOWS_EXPORT_ALL_SYMBOLS ON
-        OUTPUT_NAME ia_mpeghd_lib
-    )
-endif()
-add_library(ia_mpeghd_lib_static STATIC)
-target_link_libraries(ia_mpeghd_lib_static PRIVATE ia_mpeghd_obj)
 
 if(MSVC)
 	target_compile_options(
@@ -240,13 +232,13 @@ if(MSVC)
 	target_link_libraries (
 		ia_mpeghd_testbench 
 		LINK_PUBLIC
-		ia_mpeghd_lib_static
+		ia_mpeghd_obj
 		)
 else()
 	target_link_libraries (
 		ia_mpeghd_testbench 
 		LINK_PUBLIC
-		ia_mpeghd_lib_static
+		ia_mpeghd_obj
 		m
 		)
 endif()
