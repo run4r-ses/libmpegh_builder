@@ -1,0 +1,25 @@
+name: . Windows builder for libmpegh
+on:
+  workflow_call:
+
+jobs:
+  build_windows:
+    uses: ./.github/workflows/common.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            suffix: windows-x64
+
+          - arch: ARM64
+            suffix: windows-arm64
+
+    with:
+      runs_on: windows-latest
+      artifact_suffix: ${{ matrix.suffix }}
+      cmake_command: 'cmake .. -A ${{ matrix.arch }} -DLC_LEVEL_4=ON'
+      postbuild_command: >
+        Get-ChildItem -Path . -Exclude "Release" | Remove-Item -Recurse -Force;
+        Move-Item -Path Release\* -Destination . -Force;
+        Remove-Item -Path Release -Recurse -Force

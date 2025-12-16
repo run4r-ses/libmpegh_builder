@@ -1,0 +1,56 @@
+name: Common builder for libmpegh
+on:
+  workflow_call:
+    inputs:
+      artifact_suffix:
+        required: true
+        type: string
+      runs_on:
+        required: true
+        type: string
+      cmake_command:
+        required: true
+        type: string
+      postbuild_command:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build:
+    name: . Build for ${{ inputs.runs_on }}
+    runs-on: ${{ inputs.runs_on }}
+
+    steps:
+      - name: . Clone libmpegh
+        run: git clone --depth=1 --single-branch https://github.com/ittiam-systems/libmpegh.git
+
+      - name: . Hotpatch code
+        working-directory: libmpegh
+        shell: bash
+        run: |
+          perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' decoder/impeghd_type_def.h
+
+      - name: . Create build directory
+        run: mkdir -p libmpegh/bin
+
+      - name: . Configure cmake
+        working-directory: libmpegh/bin
+        run: ${{ inputs.cmake_command }}
+
+      - name: . Build libmpegh
+        working-directory: libmpegh/bin
+        run: cmake --build . --config Release --parallel
+      
+      - name: . Post-build command
+        working-directory: libmpegh/bin
+        run: ${{ inputs.postbuild_command }}
+
+      - name: . Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: . libmpegh-build-${{ inputs.artifact_suffix }}
+          path: |
+            libmpegh/bin/*ia_mpeghd_lib*
+            libmpegh/bin/ia_mpeghd_testbench*
+          retention-days: 90

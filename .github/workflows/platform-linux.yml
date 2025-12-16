@@ -1,0 +1,33 @@
+name: . Linux builder for libmpegh
+on:
+  workflow_call:
+
+jobs:
+  build_linux:
+    uses: ./.github/workflows/common.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suffix: linux-x64
+            install_cmd: "true"
+            cmake_flags: ""
+
+          - suffix: linux-x86
+            install_cmd: "sudo apt-get update && sudo apt-get install -y g++-multilib"
+            cmake_flags: "-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32"
+
+          - suffix: linux-arm64
+            install_cmd: "sudo apt-get update && sudo apt-get install -y g++-aarch64-linux-gnu"
+            cmake_flags: "-DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++"
+
+          - suffix: linux-armv7
+            install_cmd: "sudo apt-get update && sudo apt-get install -y g++-arm-linux-gnueabihf"
+            cmake_flags: "-DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++"
+
+    with:
+      runs_on: ubuntu-latest
+      artifact_suffix: ${{ matrix.suffix }}
+      cmake_command: |
+        ${{ matrix.install_cmd }}
+        cmake .. ${{ matrix.cmake_flags }} -DLC_LEVEL_4=ON

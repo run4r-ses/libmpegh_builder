@@ -1,0 +1,49 @@
+name: Build libmpegh - all platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_windows:
+        description: "Build Windows"
+        required: false
+        default: true
+        type: boolean
+      build_linux:
+        description: "Build Linux"
+        required: false
+        default: true
+        type: boolean
+      build_macos:
+        description: "Build macOS"
+        required: false
+        default: true
+        type: boolean
+      build_android:
+        description: "Build Android"
+        required: false
+        default: true
+        type: boolean
+      android_api_level:
+        description: "Android API Level"
+        required: false
+        default: "21"
+        type: string
+
+jobs:
+  windows:
+    if: ${{ github.event.inputs.build_windows == 'true' }}
+    uses: ./.github/workflows/platform-windows.yml
+
+  linux:
+    if: ${{ github.event.inputs.build_linux == 'true' }}
+    uses: ./.github/workflows/platform-linux.yml
+
+  macos:
+    if: ${{ github.event.inputs.build_macos == 'true' }}
+    uses: ./.github/workflows/platform-macos.yml
+
+  android:
+    if: ${{ github.event.inputs.build_android == 'true' }}
+    uses: ./.github/workflows/platform-android.yml
+    with:
+      api_level: ${{ inputs.android_api_level }}

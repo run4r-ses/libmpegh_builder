@@ -1,0 +1,36 @@
+name: . Android builder for libmpegh
+
+on:
+  workflow_call:
+    inputs:
+      api_level:
+        description: "Android API Level"
+        required: false
+        default: "21"
+        type: string
+
+jobs:
+  build_android:
+    uses: ./.github/workflows/common.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - abi: arm64-v8a
+            suffix: android-arm64
+          - abi: armeabi-v7a
+            suffix: android-armv7
+          - abi: x86_64
+            suffix: android-x64
+          - abi: x86
+            suffix: android-x86
+    with:
+      runs_on: ubuntu-latest
+      artifact_suffix: android-${{ matrix.suffix }}
+      cmake_command: |
+        cmake .. \
+          -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=${{ matrix.abi }} \
+          -DANDROID_PLATFORM=android-${{ inputs.api_level }} \
+          -DLC_LEVEL_4=ON \
+          -DCMAKE_BUILD_TYPE=Release

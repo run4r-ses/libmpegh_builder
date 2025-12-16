@@ -1,0 +1,15 @@
+name: . macOS builder for libmpegh
+on:
+  workflow_call:
+
+jobs:
+  macos:
+    uses: ./.github/workflows/common.yml
+    with:
+      runs_on: macos-latest
+      artifact_suffix: macos-universal
+      cmake_command: |
+        cmake .. \
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+          -DLC_LEVEL_4=ON \
+          -DCMAKE_BUILD_TYPE=Release
