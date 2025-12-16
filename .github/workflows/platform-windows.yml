@@ -18,7 +18,7 @@ jobs:
     with:
       runs_on: windows-latest
       artifact_suffix: ${{ matrix.suffix }}
-      cmake_command: 'cmake .. -A ${{ matrix.arch }} -DLC_LEVEL_4=ON'
+      cmake_command: 'cmake .. -A ${{ matrix.arch }} -DLC_LEVEL_4=ON -DBUILD_SHARED_LIBS=ON'
       postbuild_command: >
         Get-ChildItem -Path . -Exclude "Release" | Remove-Item -Recurse -Force;
         Move-Item -Path Release\* -Destination . -Force;
