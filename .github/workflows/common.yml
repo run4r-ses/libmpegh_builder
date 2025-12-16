@@ -18,7 +18,7 @@ on:
 
 jobs:
   build:
-    name: . Build for ${{ inputs.runs_on }}
+    name: Build for ${{ inputs.runs_on }}
     runs-on: ${{ inputs.runs_on }}
 
     steps:
@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' decoder/impeghd_type_def.h
-          perl -pi -e 's/add_library\s*\(\s*ia_mpeghd_lib\s+STATIC/add_library(ia_mpeghd_lib/g' CMakeLists.txt
+          perl -0777 -pi -e 's/add_library\s*\(\s*ia_mpeghd_lib\s+STATIC/add_library(ia_mpeghd_lib/g' CMakeLists.txt
           cat CMakeLists.txt
 
       - name: Create build directory
