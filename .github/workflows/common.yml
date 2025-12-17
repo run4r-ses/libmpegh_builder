@@ -49,7 +49,10 @@ jobs:
 
       - name: Configure cmake
         working-directory: libmpegh/bin
-        run: ${{ inputs.cmake_command }} ${{ matrix.extra_flags }}
+        env:
+          RAW_CMAKE_CMD: ${{ inputs.cmake_command }}
+          EXT_FLAGS: ${{ matrix.extra_flags }}
+        run: eval "$RAW_CMAKE_CMD $EXT_FLAGS"
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
