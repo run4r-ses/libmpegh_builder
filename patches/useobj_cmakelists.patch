@@ -1,0 +1,130 @@
+diff --git CMakeLists.txt CMakeLists.txt
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.8)
++cmake_minimum_required(VERSION 3.8...3.27)
+
+ project (MPEG-H_Decoder VERSION 1.6)
+
+@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_SUPPRESS_REGENERATION true)
+
+ option(LC_LEVEL_4 "Enables low complexity level 4 decoder" OFF)
++option(EXECUTABLE_IS_STATIC "Build executable as static binary regardless of args" ON)
+
+ IF(LC_LEVEL_4)
+        ADD_DEFINITIONS(-DLC_LEVEL_4)
+@@ -15,8 +16,8 @@ ENDIF()
+
+ # Add Library Target
+ add_library (
+-        ia_mpeghd_lib
+-        STATIC
++        ia_mpeghd_obj
++        OBJECT
+        decoder/impd_drc_dynamic_payload.c
+        decoder/impd_drc_extr_delta_coded_info.c
+        decoder/impd_drc_filter_bank.c
+@@ -118,6 +119,7 @@ add_library (
+        decoder/ia_core_coder_tns.c
+        decoder/ia_core_coder_windowing.c
+         )
++set_target_properties(ia_mpeghd_obj PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+ add_executable (ia_mpeghd_testbench
+        test/impeghd_error.c
+@@ -131,13 +133,20 @@ add_executable (ia_mpeghd_testbench
+        test/mp4/impeghd_mp4_video.c
+        )
+
++add_library(ia_mpeghd_lib)
++target_link_libraries(ia_mpeghd_lib PRIVATE ia_mpeghd_obj)
++if(WIN32)
++       set_target_properties(ia_mpeghd_lib PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++endif()
++
+ if(MSVC)
+        target_compile_options(
+-               ia_mpeghd_lib
++               ia_mpeghd_obj
+                PRIVATE
+                -D_CRT_SECURE_NO_WARNINGS
+                -D_X86_
+                )
++
+        target_compile_options(
+                ia_mpeghd_testbench
+                PRIVATE
+@@ -147,7 +156,7 @@ if(MSVC)
+ else()
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "amd64")
+                target_compile_options(
+-                       ia_mpeghd_lib
++                       ia_mpeghd_obj
+                        PRIVATE
+                        -D_X86_
+                        -c -O3 -Wall -Wsequence-point
+@@ -161,7 +170,7 @@ else()
+                set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86_64)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
+                target_compile_options(
+-                       ia_mpeghd_lib
++                       ia_mpeghd_obj
+                        PRIVATE
+                        -D_X86_
+                        -c -m32 -O3 -Wall -Wsequence-point
+@@ -178,7 +187,7 @@ else()
+                set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l")
+                target_compile_options(
+-                       ia_mpeghd_lib
++                       ia_mpeghd_obj
+                        PRIVATE
+                        -D_ARM_
+                        -c -O3 -mcpu=cortex-a8 -mfloat-abi=hard -Wall
+@@ -192,7 +201,7 @@ else()
+                        )
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+                target_compile_options(
+-                       ia_mpeghd_lib
++                       ia_mpeghd_obj
+                        PRIVATE
+                        -D_ARM_
+                        -c -O3 -march=armv8-a -Wall -Wsequence-point
+@@ -208,7 +217,7 @@ else()
+ endif()
+
+ target_include_directories (
+-        ia_mpeghd_lib
++        ia_mpeghd_obj
+         PUBLIC
+        ${PLAT_PATH}
+        ${CMAKE_CURRENT_LIST_DIR}/decoder
+@@ -225,18 +234,14 @@ target_include_directories (
+        ${CMAKE_CURRENT_LIST_DIR}/test/mp4
+         )
+
+-if(MSVC)
+-       target_link_libraries (
+-               ia_mpeghd_testbench
+-               LINK_PUBLIC
+-               ia_mpeghd_lib
+-               )
++if(NOT MSVC)
++    target_link_libraries(ia_mpeghd_obj PUBLIC m)
++endif()
++
++if(EXECUTABLE_IS_STATIC)
++       set(TB_LINK_LIB ia_mpeghd_obj)
+ else()
+-       target_link_libraries (
+-               ia_mpeghd_testbench
+-               LINK_PUBLIC
+-               ia_mpeghd_lib
+-               m
+-               )
++       set(TB_LINK_LIB ia_mpeghd_lib)
+ endif()
+
++target_link_libraries(ia_mpeghd_testbench PRIVATE ${TB_LINK_LIB})

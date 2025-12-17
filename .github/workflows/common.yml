@@ -29,11 +29,10 @@ jobs:
         run: git clone --depth=1 --single-branch https://github.com/ittiam-systems/libmpegh.git
 
       - name: Hotpatch code
-        working-directory: .
         shell: bash
         run: |
           perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' libmpegh/decoder/impeghd_type_def.h
-          cp patched/CMakeLists.txt libmpegh/CMakeLists.txt
+          patch libmpegh/CMakeLists.txt < patches/useobj_cmakelists.patch
 
       - name: Create build directory
         run: mkdir -p libmpegh/bin
