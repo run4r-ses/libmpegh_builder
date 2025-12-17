@@ -49,10 +49,13 @@ jobs:
 
       - name: Configure cmake
         working-directory: libmpegh/bin
-        env:
-          RAW_CMD: ${{ inputs.cmake_command }}
-          FLAGS: ${{ matrix.extra_flags }}
-        run: python3 ../../patches/stripnewline.py "$RAW_CMD" "$FLAGS"
+        shell: bash
+        run: ${{ inputs.cmake_command }}
+
+      - name: Append flags
+        working-directory: libmpegh/bin
+        shell: bash
+        run: cmake . ${{ matrix.extra_flags }}
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
