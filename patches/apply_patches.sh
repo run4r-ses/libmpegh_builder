@@ -9,9 +9,11 @@ for item in "${patches[@]}"; do
 
     echo "Applying patch $patch_file to $target_file"
 
-    # CRLF -> LF
-    perl -pi -e 's/\r\n/\n/g' "$target_file"
-    perl -pi -e 's/\r\n/\n/g' "$patch_file"
+    if grep -q $'\r' "$target_file"; then
+        perl -pi -e 's/\r\n/\n/g; s/\n/\r\n/g' "$patch_file" # CRLF
+    else
+        perl -pi -e 's/\r\n/\n/g' "$patch_file" # LF
+    fi
 
     patch "$target_file" < "$patch_file"
 done

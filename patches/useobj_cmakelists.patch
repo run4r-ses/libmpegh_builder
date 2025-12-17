@@ -1,6 +1,3 @@
-diff --git CMakeLists.txt CMakeLists.txt
---- CMakeLists.txt
-+++ CMakeLists.txt
 @@ -1,4 +1,4 @@
 -cmake_minimum_required (VERSION 3.8)
 +cmake_minimum_required(VERSION 3.8...3.27)
@@ -30,18 +27,20 @@ diff --git CMakeLists.txt CMakeLists.txt
         decoder/ia_core_coder_tns.c
         decoder/ia_core_coder_windowing.c
          )
-+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++set_target_properties(ia_mpeghd_obj PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
  add_executable (ia_mpeghd_testbench
         test/impeghd_error.c
-@@ -131,13 +133,20 @@ add_executable (ia_mpeghd_testbench
+@@ -131,9 +133,17 @@ add_executable (ia_mpeghd_testbench
         test/mp4/impeghd_mp4_video.c
         )
 
-+add_library(ia_mpeghd_lib)
++add_library(ia_mpeghd_lib SHARED)
 +target_link_libraries(ia_mpeghd_lib PRIVATE ia_mpeghd_obj)
 +if(WIN32)
-+       set_target_properties(ia_mpeghd_lib PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++       set_target_properties(ia_mpeghd_lib PROPERTIES
++       WINDOWS_EXPORT_ALL_SYMBOLS ON
++    )
 +endif()
 +
  if(MSVC)
@@ -51,12 +50,7 @@ diff --git CMakeLists.txt CMakeLists.txt
                 PRIVATE
                 -D_CRT_SECURE_NO_WARNINGS
                 -D_X86_
-                )
-+
-        target_compile_options(
-                ia_mpeghd_testbench
-                PRIVATE
-@@ -147,7 +156,7 @@ if(MSVC)
+@@ -147,7 +157,7 @@ if(MSVC)
  else()
         if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "amd64")
                 target_compile_options(
@@ -65,7 +59,7 @@ diff --git CMakeLists.txt CMakeLists.txt
                         PRIVATE
                         -D_X86_
                         -c -O3 -Wall -Wsequence-point
-@@ -161,7 +170,7 @@ else()
+@@ -161,7 +171,7 @@ else()
                 set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86_64)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
                 target_compile_options(
@@ -74,7 +68,7 @@ diff --git CMakeLists.txt CMakeLists.txt
                         PRIVATE
                         -D_X86_
                         -c -m32 -O3 -Wall -Wsequence-point
-@@ -178,7 +187,7 @@ else()
+@@ -178,7 +188,7 @@ else()
                 set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l")
                 target_compile_options(
@@ -83,7 +77,7 @@ diff --git CMakeLists.txt CMakeLists.txt
                         PRIVATE
                         -D_ARM_
                         -c -O3 -mcpu=cortex-a8 -mfloat-abi=hard -Wall
-@@ -192,7 +201,7 @@ else()
+@@ -192,7 +202,7 @@ else()
                         )
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
                 target_compile_options(
@@ -92,7 +86,7 @@ diff --git CMakeLists.txt CMakeLists.txt
                         PRIVATE
                         -D_ARM_
                         -c -O3 -march=armv8-a -Wall -Wsequence-point
-@@ -208,7 +217,7 @@ else()
+@@ -208,7 +218,7 @@ else()
  endif()
 
  target_include_directories (
@@ -101,7 +95,7 @@ diff --git CMakeLists.txt CMakeLists.txt
          PUBLIC
         ${PLAT_PATH}
         ${CMAKE_CURRENT_LIST_DIR}/decoder
-@@ -225,18 +234,14 @@ target_include_directories (
+@@ -225,18 +235,14 @@ target_include_directories (
         ${CMAKE_CURRENT_LIST_DIR}/test/mp4
          )
 
