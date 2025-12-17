@@ -22,7 +22,7 @@ for item in "${patches[@]}"; do
     normalize_to_lf "$patch_file"
     normalize_to_lf "$target_file"
 
-    patch -N "$target_file" < "$patch_file"
+    patch -p0 --fuzz=3 --ignore-whitespace "$target_file" < "$patch_file"
 done
 
 echo "All patches applied"
