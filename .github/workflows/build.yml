@@ -23,6 +23,11 @@ on:
         required: false
         default: true
         type: boolean
+      build_wasm:
+        description: "Build WASM"
+        required: false
+        default: true
+        type: boolean
       android_api_level:
         description: "Android API Level"
         required: false
@@ -47,3 +52,7 @@ jobs:
     uses: ./.github/workflows/platform-android.yml
     with:
       api_level: ${{ inputs.android_api_level }}
+  
+  wasm:
+    if: ${{ github.event.inputs.build_wasm == 'true' }}
+    uses: ./.github/workflows/platform-wasm.yml
