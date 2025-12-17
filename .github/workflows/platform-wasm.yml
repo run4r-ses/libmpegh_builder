@@ -15,3 +15,14 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=install \
           -DIA_MPEGH_DEC_NO_DRC=1
       override_flags: "-DBUILD_SHARED_LIBS=OFF"
+      postbuild_command: |
+        cp ../../patches/wrapper.c wrapper.c
+        emcc -c wrapper.c -Ilibmpegh/decoder -o wrapper.o -O3
+        emcc wrapper.o libmpegh/bin/libia_mpeghd_lib.a \
+          -o libmpegh_decoder.js \
+          -s MODULARIZE=1 \
+          -s EXPORT_NAME="createMpeghDecoder" \
+          -s ALLOW_MEMORY_GROWTH=1 \
+          -s "EXPORTED_FUNCTIONS=['_create_decoder', '_get_input_buffer', '_get_input_write_offset', '_get_input_capacity', '_process_packet', '_get_output_buffer', '_get_output_size', '_destroy_decoder', '_malloc', '_free']" \
+          --no-entry \
+          -O3
