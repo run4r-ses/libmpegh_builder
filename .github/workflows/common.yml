@@ -84,4 +84,5 @@ jobs:
           path: |
             libmpegh/bin/*ia_mpeghd_lib*
             libmpegh/bin/ia_mpeghd_testbench*
+            libmpegh/bin/libmpegh_decoder*
           retention-days: 90
