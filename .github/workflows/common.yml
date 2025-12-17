@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup Emscripten
         if: inputs.setup_emsdk
-        uses: lovasoa/setup-emscripten@master
+        uses: mymindstorm/setup-emsdk@v14
       
       - name: Configure cmake
         working-directory: libmpegh/bin
