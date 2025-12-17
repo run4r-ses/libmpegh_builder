@@ -4,7 +4,7 @@
 
  project (MPEG-H_Decoder VERSION 1.6)
 
-@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+@@ -8,15 +8,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
  set(CMAKE_SUPPRESS_REGENERATION true)
 
  option(LC_LEVEL_4 "Enables low complexity level 4 decoder" OFF)
@@ -12,8 +12,10 @@
 
  IF(LC_LEVEL_4)
         ADD_DEFINITIONS(-DLC_LEVEL_4)
-@@ -15,8 +16,8 @@ ENDIF()
+ ENDIF()
 
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++
  # Add Library Target
  add_library (
 -        ia_mpeghd_lib
@@ -23,20 +25,13 @@
         decoder/impd_drc_dynamic_payload.c
         decoder/impd_drc_extr_delta_coded_info.c
         decoder/impd_drc_filter_bank.c
-@@ -118,6 +119,7 @@ add_library (
-        decoder/ia_core_coder_tns.c
-        decoder/ia_core_coder_windowing.c
-         )
-+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
- add_executable (ia_mpeghd_testbench
-        test/impeghd_error.c
-@@ -131,9 +133,17 @@ add_executable (ia_mpeghd_testbench
+@@ -131,9 +134,18 @@ add_executable (ia_mpeghd_testbench
         test/mp4/impeghd_mp4_video.c
         )
 
 +add_library(ia_mpeghd_lib SHARED)
 +target_link_libraries(ia_mpeghd_lib PRIVATE ia_mpeghd_obj)
++target_compile_options(ia_mpeghd_lib PRIVATE -fPIC)
 +if(WIN32)
 +       set_target_properties(ia_mpeghd_lib PROPERTIES
 +       WINDOWS_EXPORT_ALL_SYMBOLS ON
@@ -50,7 +45,7 @@
                 PRIVATE
                 -D_CRT_SECURE_NO_WARNINGS
                 -D_X86_
-@@ -147,7 +157,7 @@ if(MSVC)
+@@ -147,7 +159,7 @@ if(MSVC)
  else()
         if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "amd64")
                 target_compile_options(
@@ -59,7 +54,7 @@
                         PRIVATE
                         -D_X86_
                         -c -O3 -Wall -Wsequence-point
-@@ -161,7 +171,7 @@ else()
+@@ -161,7 +173,7 @@ else()
                 set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86_64)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
                 target_compile_options(
@@ -68,7 +63,7 @@
                         PRIVATE
                         -D_X86_
                         -c -m32 -O3 -Wall -Wsequence-point
-@@ -178,7 +188,7 @@ else()
+@@ -178,7 +190,7 @@ else()
                 set(PLAT_PATH ${CMAKE_CURRENT_LIST_DIR}/decoder/x86)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l")
                 target_compile_options(
@@ -77,7 +72,7 @@
                         PRIVATE
                         -D_ARM_
                         -c -O3 -mcpu=cortex-a8 -mfloat-abi=hard -Wall
-@@ -192,7 +202,7 @@ else()
+@@ -192,7 +204,7 @@ else()
                         )
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
                 target_compile_options(
@@ -86,7 +81,7 @@
                         PRIVATE
                         -D_ARM_
                         -c -O3 -march=armv8-a -Wall -Wsequence-point
-@@ -208,7 +218,7 @@ else()
+@@ -208,7 +220,7 @@ else()
  endif()
 
  target_include_directories (
@@ -95,7 +90,7 @@
          PUBLIC
         ${PLAT_PATH}
         ${CMAKE_CURRENT_LIST_DIR}/decoder
-@@ -225,18 +235,14 @@ target_include_directories (
+@@ -225,18 +237,14 @@ target_include_directories (
         ${CMAKE_CURRENT_LIST_DIR}/test/mp4
          )
 

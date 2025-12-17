@@ -11,7 +11,7 @@ jobs:
         include:
           - suffix: linux-x64
             install_cmd: "true"
-            cmake_flags: "-DCMAKE_C_FLAGS=-fPIC -DCMAKE_CXX_FLAGS=-fPIC" # this is an issue for some reason
+            cmake_flags: ""
 
           - suffix: linux-x86
             install_cmd: "sudo apt-get update && sudo apt-get install -y g++-multilib"

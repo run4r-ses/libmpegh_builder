@@ -26,7 +26,7 @@ jobs:
             suffix: android-x86
     with:
       runs_on: ubuntu-latest
-      artifact_suffix: android-${{ matrix.suffix }}
+      artifact_suffix: ${{ matrix.suffix }}
       cmake_command: |
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
