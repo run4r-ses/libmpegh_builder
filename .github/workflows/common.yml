@@ -11,10 +11,18 @@ on:
       cmake_command:
         required: true
         type: string
+      override_flags:
+        required: false
+        type: string
+        default: ""
       postbuild_command:
         required: false
         type: string
         default: ""
+      setup_emsdk:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -45,6 +53,10 @@ jobs:
       - name: Create build directory
         run: mkdir -p libmpegh/bin
 
+      - name: Setup Emscripten
+        if: inputs.setup_emsdk
+        uses: lovasoa/setup-emscripten@master
+      
       - name: Configure cmake
         working-directory: libmpegh/bin
         shell: bash
@@ -53,7 +65,7 @@ jobs:
       - name: Append flags
         working-directory: libmpegh/bin
         shell: bash
-        run: cmake . ${{ matrix.extra_flags }}
+        run: cmake . ${{ matrix.extra_flags }} ${{ inputs.override_flags }}
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
