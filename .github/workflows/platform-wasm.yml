@@ -14,4 +14,4 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=install \
           -DIA_MPEGH_DEC_NO_DRC=1
-      extra_override_flags: "-DBUILD_SHARED_LIBS=OFF"
+      override_flags: "-DBUILD_SHARED_LIBS=OFF"
