@@ -27,7 +27,7 @@
         decoder/ia_core_coder_tns.c
         decoder/ia_core_coder_windowing.c
          )
-+set_target_properties(ia_mpeghd_obj PROPERTIES POSITION_INDEPENDENT_CODE ON)
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
  add_executable (ia_mpeghd_testbench
         test/impeghd_error.c

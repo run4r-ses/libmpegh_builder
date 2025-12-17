@@ -1,4 +1,4 @@
-name: . Android builder for libmpegh
+name: — Android builder for libmpegh
 
 on:
   workflow_call:

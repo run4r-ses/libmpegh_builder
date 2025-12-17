@@ -1,4 +1,4 @@
-name: . macOS builder for libmpegh
+name: — macOS builder for libmpegh
 on:
   workflow_call:
 

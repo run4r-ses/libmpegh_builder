@@ -1,4 +1,4 @@
-name: . Linux builder for libmpegh
+name: — Linux builder for libmpegh
 on:
   workflow_call:
 
