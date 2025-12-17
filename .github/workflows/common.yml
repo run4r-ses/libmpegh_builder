@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' libmpegh/decoder/impeghd_type_def.h
-          patch libmpegh/CMakeLists.txt < patches/useobj_cmakelists.patch
+          chmod +x patches/apply_patches.sh; ./patches/apply_patches.sh
 
       - name: Create build directory
         run: mkdir -p libmpegh/bin
