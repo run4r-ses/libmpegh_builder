@@ -18,17 +18,15 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.build_type }} for ${{ inputs.artifact_suffix }}
+    name: Build target ${{ inputs.artifact_suffix }}${{ matrix.suffix_ext }}
     runs-on: ${{ inputs.runs_on }}
     strategy:
       fail-fast: false 
       matrix:
         include:
-          - build_type: "shared"
-            extra_flags: "-DBUILD_SHARED_LIBS=ON -DEXECUTABLE_IS_STATIC=OFF"
+          - extra_flags: "-DBUILD_SHARED_LIBS=ON -DEXECUTABLE_IS_STATIC=OFF"
             suffix_ext: "-shared"
-          - build_type: "normal"
-            extra_flags: "-DBUILD_SHARED_LIBS=ON"
+          - extra_flags: "-DBUILD_SHARED_LIBS=ON"
             suffix_ext: ""
 
     steps:
