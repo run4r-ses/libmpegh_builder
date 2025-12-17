@@ -52,9 +52,7 @@ jobs:
         env:
           RAW_CMD: ${{ inputs.cmake_command }}
           FLAGS: ${{ matrix.extra_flags }}
-        run: |
-          chmod +x ../../patches/stripnewline.sh
-          ../../patches/stripnewline.sh "$RAW_CMD" $FLAGS
+        run: python3 ../../patches/stripnewline.py "$RAW_CMD" "$FLAGS"
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
