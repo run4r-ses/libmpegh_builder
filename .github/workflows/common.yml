@@ -48,6 +48,7 @@ jobs:
         shell: bash
         run: |
           perl -pi -e 's/typedef int intptr_t;/#include <stdint.h>/g' libmpegh/decoder/impeghd_type_def.h
+          perl -pi -e 's/typedef int ptrdiff_t;/#include <stddef.h>/g' libmpegh/decoder/impeghd_type_def.h
           chmod +x patches/apply_patches.sh; ./patches/apply_patches.sh
 
       - name: Create build directory
