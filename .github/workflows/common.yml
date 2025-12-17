@@ -18,8 +18,18 @@ on:
 
 jobs:
   build:
-    name: Build for ${{ inputs.runs_on }}
+    name: Build ${{ matrix.build_type }} for ${{ inputs.artifact_suffix }}
     runs-on: ${{ inputs.runs_on }}
+    strategy:
+      fail-fast: false 
+      matrix:
+        include:
+          - build_type: "shared"
+            extra_flags: "-DBUILD_SHARED_LIBS=ON -DEXECUTABLE_IS_STATIC=OFF"
+            suffix_ext: "-shared"
+          - build_type: "normal"
+            extra_flags: "-DBUILD_SHARED_LIBS=ON"
+            suffix_ext: ""
 
     steps:
       - name: Checkout repository
@@ -39,20 +49,21 @@ jobs:
 
       - name: Configure cmake
         working-directory: libmpegh/bin
-        run: ${{ inputs.cmake_command }}
+        run: ${{ inputs.cmake_command }} ${{ matrix.extra_flags }}
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
         run: cmake --build . --config Release --parallel
       
       - name: Post-build command
+        if: inputs.postbuild_command != ''
         working-directory: libmpegh/bin
         run: ${{ inputs.postbuild_command }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: libmpegh-build-${{ inputs.artifact_suffix }}
+          name: libmpegh-build-${{ inputs.artifact_suffix }}${{ matrix.suffix_ext }}
           path: |
             libmpegh/bin/*ia_mpeghd_lib*
             libmpegh/bin/ia_mpeghd_testbench*
