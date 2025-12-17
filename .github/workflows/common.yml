@@ -50,9 +50,11 @@ jobs:
       - name: Configure cmake
         working-directory: libmpegh/bin
         env:
-          RAW_CMAKE_CMD: ${{ inputs.cmake_command }}
-          EXT_FLAGS: ${{ matrix.extra_flags }}
-        run: eval "$RAW_CMAKE_CMD $EXT_FLAGS"
+          RAW_CMD: ${{ inputs.cmake_command }}
+          FLAGS: ${{ matrix.extra_flags }}
+        run: |
+          chmod +x ../../patches/stripnewline.sh
+          ../../patches/stripnewline.sh "$RAW_CMD" $FLAGS
 
       - name: Build libmpegh
         working-directory: libmpegh/bin
