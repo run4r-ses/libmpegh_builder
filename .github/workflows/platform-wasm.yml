@@ -12,20 +12,16 @@ jobs:
       setup_emsdk: true
       skip_shared_build: true
       cmake_command: |
-
         emcmake cmake .. \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX=install 
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=install \
+        -DCMAKE_EXE_LINKER_FLAGS="\
+        -s FORCE_FILESYSTEM=1 \
+        -s INVOKE_RUN=0 \
+        -s EXIT_RUNTIME=0 \
+        -s MODULARIZE=1 \
+        -s EXPORT_NAME='createMpeghDecoder' \
+        -s EXPORTED_RUNTIME_METHODS=['callMain','FS'] \
+        -s ALLOW_MEMORY_GROWTH=1 \
+        -s TOTAL_MEMORY=256MB" -O3
       override_flags: "-DBUILD_SHARED_LIBS=OFF"
-      postbuild_command: |
-        cp ../../patches/wrapper.c wrapper.c
-        emcc -c wrapper.c -I../decoder -o wrapper.o -O3
-        emcc wrapper.o libia_mpeghd_lib.a \
-          -o libmpegh_decoder.js \
-          -s MODULARIZE=1 \
-          -s EXPORT_NAME="createMpeghDecoder" \
-          -s ALLOW_MEMORY_GROWTH=1 \
-          -s "EXPORTED_FUNCTIONS=['_create_decoder', '_get_input_buffer', '_get_input_write_offset', '_get_input_capacity', '_process_packet', '_get_output_buffer', '_get_output_size', '_destroy_decoder', '_flush_input_buffer', '_malloc', '_free']" \
-          -s "EXPORTED_RUNTIME_METHODS=['HEAPU8']" \
-          --no-entry \
-          -O3
