@@ -51,44 +51,6 @@ int get_input_capacity(DecoderContext* ctx) {
     return ctx->api.output_config.ui_inp_buf_size;
 }
 
-int process_packet(DecoderContext* ctx, int new_bytes_count) {
-    if (!ctx) return -1;
-
-        ctx->bytes_valid += new_bytes_count;
-    ctx->api.input_config.num_inp_bytes = ctx->bytes_valid;
-
-    IA_ERRORCODE err;
-
-        if (!ctx->api.output_config.ui_init_done) {
-        err = ia_mpegh_dec_init(ctx->decoder_handle, &ctx->api.input_config, &ctx->api.output_config);
-        
-                if (err == IA_MPEGH_DEC_INIT_NONFATAL_INSUFFICIENT_INPUT_BYTES) {
-            return 1;         }
-    } else {
-        err = ia_mpegh_dec_execute(ctx->decoder_handle, &ctx->api.input_config, &ctx->api.output_config);
-        
-                if (err == IA_MPEGH_DEC_EXE_NONFATAL_INSUFFICIENT_INPUT_BYTES) {
-                     }
-    }
-
-    if (err != IA_MPEGH_DEC_NO_ERROR && 
-        err != IA_MPEGH_DEC_INIT_NONFATAL_INSUFFICIENT_INPUT_BYTES &&
-        err != IA_MPEGH_DEC_EXE_NONFATAL_INSUFFICIENT_INPUT_BYTES) {
-        return (int)err;     }
-
-            int bytes_consumed = ctx->api.output_config.i_bytes_consumed;
-    int bytes_remaining = ctx->bytes_valid - bytes_consumed;
-
-    if (bytes_remaining > 0 && bytes_consumed > 0) {
-        uint8_t* base = get_input_buffer(ctx);
-        memmove(base, base + bytes_consumed, bytes_remaining);
-    }
-    
-        ctx->bytes_valid = bytes_remaining;
-
-        return 0;
-}
-
 uint8_t* get_output_buffer(DecoderContext* ctx) {
         return (uint8_t*)ctx->api.output_config.mem_info_table[IA_MEMTYPE_OUTPUT].mem_ptr;
 }
