@@ -24,7 +24,7 @@ jobs:
           -s MODULARIZE=1 \
           -s EXPORT_NAME="createMpeghDecoder" \
           -s ALLOW_MEMORY_GROWTH=1 \
-          -s "EXPORTED_FUNCTIONS=['_create_decoder', '_get_input_buffer', '_get_input_write_offset', '_get_input_capacity', '_process_packet', '_get_output_buffer', '_get_output_size', '_destroy_decoder', '_malloc', '_free']" \
+          -s "EXPORTED_FUNCTIONS=['_create_decoder', '_get_input_buffer', '_get_input_write_offset', '_get_input_capacity', '_process_packet', '_get_output_buffer', '_get_output_size', '_destroy_decoder', '_flush_input_buffer', '_malloc', '_free']" \
           -s "EXPORTED_RUNTIME_METHODS=['HEAPU8']" \
           --no-entry \
           -O3

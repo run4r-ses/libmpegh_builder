@@ -103,3 +103,48 @@ void destroy_decoder(DecoderContext* ctx) {
         free(ctx);
     }
 }
+
+void flush_input_buffer(DecoderContext* ctx) {
+    if (ctx) {
+        ctx->bytes_valid = 0;
+        ctx->api.input_config.num_inp_bytes = 0;
+    }
+}
+
+int process_packet(DecoderContext* ctx, int new_bytes_count) {
+    if (!ctx) return -1;
+
+    ctx->bytes_valid += new_bytes_count;
+    ctx->api.input_config.num_inp_bytes = ctx->bytes_valid;
+
+    IA_ERRORCODE err;
+
+    if (!ctx->api.output_config.ui_init_done) {
+        err = ia_mpegh_dec_init(ctx->decoder_handle, &ctx->api.input_config, &ctx->api.output_config);
+        if (err == 0x00001000) return 1; 
+    } else {
+        err = ia_mpegh_dec_execute(ctx->decoder_handle, &ctx->api.input_config, &ctx->api.output_config);
+    }
+
+    if (err != 0 && err != 0x00001000 && err != 0x00001800) {
+        // just flush on a critical error
+        return (int)err; 
+    }
+
+    int consumed = ctx->api.output_config.i_bytes_consumed;
+    
+    // mostly for safety
+    if (consumed > ctx->bytes_valid) consumed = ctx->bytes_valid;
+
+    int remaining = ctx->bytes_valid - consumed;
+
+    if (consumed > 0) {
+        if (remaining > 0) {
+            uint8_t* base = get_input_buffer(ctx);
+            memmove(base, base + consumed, remaining);
+        }
+        ctx->bytes_valid = remaining;
+    } 
+
+    return 0;
+}
