@@ -23,5 +23,5 @@ jobs:
         -s EXPORT_NAME='createMpeghDecoder' \
         -s EXPORTED_RUNTIME_METHODS=['callMain','FS'] \
         -s ALLOW_MEMORY_GROWTH=1 \
-        -s TOTAL_MEMORY=256MB" -O3
+        -s TOTAL_MEMORY=256MB"
       override_flags: "-DBUILD_SHARED_LIBS=OFF"
