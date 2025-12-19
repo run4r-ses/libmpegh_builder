@@ -1,9 +1,0 @@
-@@ -957,6 +957,8 @@ VOID print_usage()
- */
- IA_ERRORCODE main(WORD32 argc, char *argv[])
- {
-+  setvbuf(stdout, NULL, _IONBF, 0);
-+  setvbuf(stderr, NULL, _IONBF, 0);
-   FILE *param_file_id = NULL;
-
-   WORD8 curr_cmd[IA_MAX_CMD_LINE_LENGTH];

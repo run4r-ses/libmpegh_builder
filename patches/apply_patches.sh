@@ -3,7 +3,7 @@ PLATFORM="${1:-all}"
 
 patches=(
     "libmpegh/CMakeLists.txt patches/useobj_cmakelists.patch all"
-    "libmpegh/test/impeghd_main.c patches/disable_stdoutbuf_wasm.patch wasm"
+    "libmpegh/test/impeghd_main.c patches/addprogress_wasm.patch wasm"
 )
 
 normalize_to_lf() {

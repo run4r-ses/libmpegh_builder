@@ -1,0 +1,33 @@
+@@ -31,7 +31,6 @@
+    POSSIBILITY OF SUCH DAMAGE.
+ ---------------------------------------------------------------
+ */
+-
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -46,6 +45,8 @@
+ #include "impeghd_mp4_file_wrapper.h"
+ #include "impeghd_config_params.h"
+
++#include <emscripten.h>
++
+ /**
+  * @defgroup SampleApp Sample test bench
+  * @ingroup  SampleApp
+@@ -771,6 +772,7 @@ IA_ERRORCODE impeghd_main_process(WORD32 argc, pWORD8 argv[])
+     {
+         frame_counter++;
+         fprintf(stderr, "Frames Processed : [%5d] \r", frame_counter);
++        EM_ASM({ postMessage({ type: "progress", frame: $0 }); }, frame_counter);
+     }
+
+     ARM_PROFILE_HW_CALC_CYCLES(pstr_out_cfg->num_out_bytes, pstr_in_cfg->ui_pcm_wd_sz,
+@@ -813,6 +815,7 @@ IA_ERRORCODE impeghd_main_process(WORD32 argc, pWORD8 argv[])
+                          pstr_out_cfg->i_samp_freq, pstr_out_cfg->i_num_chan);
+
+   fprintf(stderr, "Frames Processed : [%5d] \n", frame_counter);
++  EM_ASM({ postMessage({ type: "progress", frame: $0 }); }, frame_counter);
+   if (!fseek(g_pf_out, 0, SEEK_SET))
+   {
+     err_code = write_wav_header(g_pf_out, i_total_bytes, pstr_out_cfg->i_samp_freq,
