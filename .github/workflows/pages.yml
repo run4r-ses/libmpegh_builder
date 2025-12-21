@@ -6,24 +6,49 @@ on:
     branches: [main]
     types: 
       - completed
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Build run ID"
+        required: false
+        type: string
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 jobs:
   deploy-pages:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Resolve run ID
+        id: resolve_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            RUN_ID="${{ github.event.workflow_run.id }}"
+          elif [[ -n "${{ inputs.run_id }}" ]]; then
+            RUN_ID="${{ inputs.run_id }}"
+          else
+            RUN_ID=$(gh run list --workflow "Build libmpegh" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
+              exit 1
+            fi
+          fi
+          echo "TARGET_ID=$RUN_ID" >> $GITHUB_ENV
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ env.TARGET_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: temp_artifacts
 
