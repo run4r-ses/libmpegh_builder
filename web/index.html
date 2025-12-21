@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download libmpegh</title>
+    <link rel="stylesheet" href="theme/light.css">
+    <link rel="stylesheet" href="theme/dark.css" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script type="module">
+        import 'https://esm.run/@material/web/all.js';
+        import { styles as typescaleStyles } from 'https://esm.run/@material/web/typography/md-typescale-styles.js';
+        document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="md-typescale-title-bold">Download libmpegh</h1>
+        <div class="credit-logo">
+            <span class="credit-text">Original source code by</span>
+            <svg class="ittiam-logo" xmlns="http://www.w3.org/2000/svg" viewBox="-67.353 -36.50125 583.726 219.0075">
+                <path fill="#ff9e3d"
+                    d="M189.8 0c-10.14 0-18.36 8.222-18.36 18.36s8.222 18.36 18.36 18.36c10.14 0 18.36-8.222 18.36-18.36C208.16 8.22 199.938 0 189.8 0zM0 9.745v134.4h34.26V9.745zm58.88 15.95v27.45H42.7v27.09h16.18v63.93h32.44v-63.93h24.94v63.93h32.71v-63.93h25.06v63.93h32.45v-91.02h-57.5v-27.45h-32.71v27.45H91.33v-27.45zm205.7 21.65c-13.4-.07-23.3 4.532-32.03 14.18-8.616 9.648-12.92 21.29-12.92 34.91 0 13.63 4.366 25.33 13.1 35.1 8.855 9.648 19.98 14.47 33.38 14.47 10.91-.247 23.02-5.089 27.42-12.36v9.283h33.58v-41.28c0-11.02.234-27.83 14.26-27.83 14.03 0 14.16 16.81 14.16 27.83v41.28h32.35v-41.28c0-11.79.534-27.05 15.46-27.05 13.69 0 13.33 16.81 13.33 27.05v41.28h32.35v-58.29c0-22.73-8.506-36.19-31.61-36.19-12.44 0-24.2 6.06-30.42 17.47-6.576-12.12-17.95-17.47-31.1-17.47-11.72 0-21.11 4.273-28.78 14.42v-11.39h-33.58v8.531c-7.859-8.341-17.37-12.61-28.95-12.67zm8.832 29.38c12.64.851 19.92 9.258 20.06 20.54-.588 12.54-8.985 20.24-20.06 20.37-13.04-.821-19.92-8.678-20.06-20.37.551-12.4 9.055-20.41 20.06-20.54z" />
+            </svg>
+        </div>
+
+        <md-outlined-select id="platform" label="Platform">
+            <md-select-option value="windows">
+                <div slot="headline">Windows</div>
+            </md-select-option>
+            <md-select-option value="linux">
+                <div slot="headline">Linux</div>
+            </md-select-option>
+            <md-select-option value="macos">
+                <div slot="headline">macOS</div>
+            </md-select-option>
+            <md-select-option value="android">
+                <div slot="headline">Android</div>
+            </md-select-option>
+            <md-select-option value="wasm">
+                <div slot="headline">WASM</div>
+            </md-select-option>
+        </md-outlined-select>
+
+        <div id="arch-container" class="hidden">
+            <md-outlined-select id="arch" label="Architecture">
+            </md-outlined-select>
+        </div>
+
+        <div id="type-container" class="hidden">
+            <label class="md-typescale-title-medium">Build Type</label>
+            <div class="radio-group" role="radiogroup">
+                <label class="radio-option">
+                    <md-radio id="shared" name="buildtype" value="shared" checked></md-radio>
+                    <span class="md-typescale-body-large">Shared (recommended)</span>
+                </label>
+                <label class="radio-option">
+                    <md-radio id="static" name="buildtype" value="static"></md-radio>
+                    <span class="md-typescale-body-large">Non-shared</span>
+                </label>
+            </div>
+        </div>
+
+        <md-filled-button id="download-btn" disabled>
+            Download
+        </md-filled-button>
+    </div>
+
+    <script>
+        const platformSelect = document.getElementById('platform');
+        const archSelect = document.getElementById('arch');
+        const archContainer = document.getElementById('arch-container');
+        const typeContainer = document.getElementById('type-container');
+        const downloadBtn = document.getElementById('download-btn');
+        const sharedRadio = document.getElementById('shared');
+
+        const config = {
+            windows: ['x64', 'arm64'],
+            linux: ['x64', 'x86', 'arm64', 'armv7'],
+            android: ['arm64', 'armv7', 'x64', 'x86'],
+        };
+
+        function updateForm() {
+            const platform = platformSelect.value;
+            downloadBtn.disabled = true;
+
+            archContainer.classList.add('hidden');
+            typeContainer.classList.add('hidden');
+
+            if (!platform) return;
+
+            if (platform === 'wasm') {
+                downloadBtn.disabled = false;
+                return;
+            }
+
+            if (platform === 'macos') {
+                typeContainer.classList.remove('hidden');
+                downloadBtn.disabled = false;
+                return;
+            }
+
+            archContainer.classList.remove('hidden');
+            typeContainer.classList.remove('hidden');
+
+            if (config[platform]) {
+                while (archSelect.firstChild) {
+                    archSelect.removeChild(archSelect.firstChild);
+                }
+
+                config[platform].forEach((arch, index) => {
+                    const opt = document.createElement('md-select-option');
+                    opt.value = arch;
+
+                    const headline = document.createElement('div');
+                    headline.slot = "headline";
+                    headline.textContent = arch;
+
+                    opt.appendChild(headline);
+                    archSelect.appendChild(opt);
+
+                    if (index === 0) opt.selected = true;
+                });
+            }
+
+            downloadBtn.disabled = false;
+        }
+
+        function getDownloadUrl() {
+            const platform = platformSelect.value;
+
+            if (platform === 'wasm') {
+                return 'downloads/libmpegh-build-wasm.zip';
+            }
+
+            let arch = '';
+            if (platform === 'macos') {
+                arch = 'universal';
+            } else {
+                arch = archSelect.value;
+            }
+
+            const isShared = sharedRadio.checked;
+
+            let filename = `libmpegh-build-${platform}-${arch}`;
+
+            if (isShared) {
+                filename += '-shared';
+            }
+
+            return `downloads/${filename}.zip`;
+        }
+
+        platformSelect.addEventListener('input', updateForm);
+
+        downloadBtn.addEventListener('click', () => {
+            const url = getDownloadUrl();
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', '');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+
+</html>
