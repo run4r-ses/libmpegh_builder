@@ -33,7 +33,7 @@
             </svg>
         </div>
 
-        <md-outlined-select id="platform" label="Platform">
+        <md-outlined-select id="platform" label="Platform" autocomplete="off">
             <md-select-option value="windows">
                 <div slot="headline">Windows</div>
             </md-select-option>
@@ -52,7 +52,7 @@
         </md-outlined-select>
 
         <div id="arch-container" class="hidden">
-            <md-outlined-select id="arch" label="Architecture">
+            <md-outlined-select id="arch" label="Architecture" autocomplete="off">
             </md-outlined-select>
         </div>
 
@@ -117,7 +117,19 @@
                     archSelect.removeChild(archSelect.firstChild);
                 }
 
-                config[platform].forEach((arch, index) => {
+                const placeholder = document.createElement('md-select-option');
+                placeholder.value = "";
+                placeholder.disabled = true;
+                placeholder.selected = true;
+
+                const placeholderText = document.createElement('div');
+                placeholderText.slot = "headline";
+                placeholderText.textContent = "Select Architecture";
+
+                placeholder.appendChild(placeholderText);
+                archSelect.appendChild(placeholder);
+
+                config[platform].forEach((arch) => {
                     const opt = document.createElement('md-select-option');
                     opt.value = arch;
 
@@ -127,14 +139,11 @@
 
                     opt.appendChild(headline);
                     archSelect.appendChild(opt);
-
-                    if (index === 0) opt.selected = true;
                 });
+
+                archSelect.value = "";
             }
-
-            downloadBtn.disabled = false;
         }
-
         function getDownloadUrl() {
             const platform = platformSelect.value;
 
@@ -160,7 +169,21 @@
             return `downloads/${filename}.zip`;
         }
 
+        window.addEventListener('load', () => {
+            platformSelect.value = '';
+            archSelect.innerHTML = '';
+            downloadBtn.disabled = true;
+        });
+
         platformSelect.addEventListener('input', updateForm);
+
+        archSelect.addEventListener('input', () => {
+            if (archSelect.value && archSelect.value !== "") {
+                downloadBtn.disabled = false;
+            } else {
+                downloadBtn.disabled = true;
+            }
+        });
 
         downloadBtn.addEventListener('click', () => {
             const url = getDownloadUrl();
