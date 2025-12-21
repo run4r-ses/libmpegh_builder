@@ -38,7 +38,7 @@ jobs:
           elif [[ -n "${{ inputs.run_id }}" ]]; then
             RUN_ID="${{ inputs.run_id }}"
           else
-            RUN_ID=$(gh run list --workflow "Build libmpegh" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            RUN_ID=$(gh run list -R ${{ github.repository }} --workflow "Build libmpegh" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
             if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
               exit 1
             fi
