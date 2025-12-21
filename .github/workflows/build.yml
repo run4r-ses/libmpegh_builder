@@ -1,4 +1,4 @@
-name: Build libmpegh - all platforms
+name: Build libmpegh
 
 on:
   workflow_dispatch:

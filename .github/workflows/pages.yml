@@ -1,0 +1,208 @@
+name: Deploy download page
+
+on:
+  workflow_run:
+    workflows: ["Build libmpegh"]
+    branches: [main]
+    types: 
+      - completed
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-pages:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: temp_artifacts
+
+      - name: Prepare downloads
+        shell: bash
+        run: |
+          mkdir -p public/downloads
+
+          cd temp_artifacts
+          for d in *; do
+            if [ -d "$d" ]; then
+              echo "Zipping $d..."
+              cd "$d"
+              zip -r "../../public/downloads/$d.zip" .
+              cd ..
+            fi
+          done
+          cd ..
+
+      - name: Generate HTML page
+        shell: bash
+        run: |
+          cat <<EOF > public/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Download libmpegh</title>
+              <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                  .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+                  h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #333; text-align: center; }
+                  label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; }
+                  select, .radio-group { width: 100%; margin-bottom: 1.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+                  .radio-group { display: flex; gap: 1rem; border: none; padding: 0; }
+                  .radio-item { display: flex; align-items: center; gap: 0.25rem; font-weight: normal; }
+                  button { width: 100%; padding: 0.75rem; background-color: #2da44e; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+                  button:hover { background-color: #2c974b; }
+                  button:disabled { background-color: #94d3a2; cursor: not-allowed; }
+                  .hidden { display: none; }
+                  #status { margin-top: 1rem; text-align: center; font-size: 0.9rem; color: #666; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Get libmpegh</h1>
+                  
+                  <label for="platform">Select your platform</label>
+                  <select id="platform">
+                      <option value="" disabled selected>Choose OS...</option>
+                      <option value="windows">Windows</option>
+                      <option value="linux">Linux</option>
+                      <option value="macos">macOS</option>
+                      <option value="android">Android</option>
+                      <option value="wasm">WebAssembly (WASM)</option>
+                  </select>
+
+                  <div id="arch-container" class="hidden">
+                      <label for="arch">Select your architecture</label>
+                      <select id="arch"></select>
+                  </div>
+
+                  <div id="type-container" class="hidden">
+                      <label>Build Type</label>
+                      <div class="radio-group">
+                          <div class="radio-item">
+                              <input type="radio" id="shared" name="buildtype" value="shared" checked>
+                              <label for="shared">Shared (rec.)</label>
+                          </div>
+                          <div class="radio-item">
+                              <input type="radio" id="static" name="buildtype" value="static">
+                              <label for="static">Non-shared</label>
+                          </div>
+                      </div>
+                  </div>
+
+                  <button id="download-btn" disabled>Download</button>
+                  <div id="status"></div>
+              </div>
+
+              <script>
+                  const platformSelect = document.getElementById('platform');
+                  const archSelect = document.getElementById('arch');
+                  const archContainer = document.getElementById('arch-container');
+                  const typeContainer = document.getElementById('type-container');
+                  const downloadBtn = document.getElementById('download-btn');
+                  const statusDiv = document.getElementById('status');
+                  const radios = document.getElementsByName('buildtype');
+
+                  const config = {
+                      windows: ['x64', 'arm64'],
+                      linux: ['x64', 'x86', 'arm64', 'armv7'],
+                      android: ['arm64', 'armv7', 'x64', 'x86'],
+                      macos: ['universal']
+                  };
+
+                  function updateForm() {
+                      const platform = platformSelect.value;
+                      
+                      downloadBtn.disabled = true;
+                      statusDiv.textContent = "";
+
+                      if (platform === 'wasm') {
+                          archContainer.classList.add('hidden');
+                          typeContainer.classList.add('hidden');
+                          downloadBtn.disabled = false;
+                          return;
+                      }
+
+                      archContainer.classList.remove('hidden');
+                      typeContainer.classList.remove('hidden');
+
+                      if (config[platform]) {
+                          const currentArch = archSelect.value;
+                          archSelect.innerHTML = '';
+                          
+                          config[platform].forEach(arch => {
+                              const opt = document.createElement('option');
+                              opt.value = arch;
+                              opt.textContent = arch;
+                              archSelect.appendChild(opt);
+                          });
+
+                          if (archSelect.options.length > 0) {
+                              archSelect.value = archSelect.options[0].value;
+                          }
+                      }
+                      
+                      downloadBtn.disabled = false;
+                  }
+
+                  function getDownloadUrl() {
+                      const platform = platformSelect.value;
+                      
+                      if (platform === 'wasm') {
+                          return 'downloads/libmpegh-build-wasm.zip';
+                      }
+
+                      const arch = archSelect.value;
+                      let isShared = document.querySelector('input[name="buildtype"]:checked').value === 'shared';
+                      
+                      let filename = \`libmpegh-build-\${platform}-\${arch}\`;
+                      
+                      if (platform === 'macos' && arch === 'universal') {
+                          filename = \`libmpegh-build-macos-universal\`;
+                      }
+
+                      if (isShared) {
+                          filename += '-shared';
+                      }
+
+                      return \`downloads/\${filename}.zip\`;
+                  }
+
+                  platformSelect.addEventListener('change', updateForm);
+                  archSelect.addEventListener('change', () => downloadBtn.disabled = false);
+                  radios.forEach(r => r.addEventListener('change', () => downloadBtn.disabled = false));
+
+                  downloadBtn.addEventListener('click', () => {
+                      const url = getDownloadUrl();
+                      console.log("Downloading ", url);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = url.split('/').pop();
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                  });
+              </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
