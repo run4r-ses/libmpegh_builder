@@ -87,7 +87,9 @@ jobs:
         run: ${{ inputs.postbuild_command }}
 
       - name: Copy license for compliance
-        run: cp libmpegh/LICENSE libmpegh/bin/
+        run: |
+          cp libmpegh/LICENSE libmpegh/bin/
+          cp libmpegh/LICENSE2 libmpegh/bin/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -98,4 +100,5 @@ jobs:
             libmpegh/bin/ia_mpeghd_testbench*
             libmpegh/bin/libmpegh_decoder*
             libmpegh/bin/LICENSE
+            libmpegh/bin/LICENSE2
           retention-days: 90
