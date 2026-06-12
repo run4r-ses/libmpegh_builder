@@ -1,48 +1,36 @@
-@@ -31,7 +31,6 @@
-     POSSIBILITY OF SUCH DAMAGE.
-  ---------------------------------------------------------------
-  */
--
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
 @@ -46,6 +45,8 @@
-  #include "impeghd_mp4_file_wrapper.h"
-  #include "impeghd_config_params.h"
-
+ #include "impeghd_mp4_file_wrapper.h"
+ #include "impeghd_config_params.h"
+ 
 +#include <emscripten.h>
 +
-  /**
-   * @defgroup SampleApp Sample test bench
-   * @ingroup  SampleApp
-@@ -762,8 +763,12 @@ IA_ERRORCODE impeghd_main_process(WORD32 argc, pWORD8 argv[])
-      if (pstr_out_cfg->num_out_bytes > 0)
-      {
-  #ifndef ARM_PROFILE_HW
+ /**
+  * @defgroup SampleApp Sample test bench
+  * @ingroup  SampleApp
+@@ -762,8 +763,10 @@
+     if (pstr_out_cfg->num_out_bytes > 0)
+     {
+ #ifndef ARM_PROFILE_HW
 -      fwrite(pb_out_buf, sizeof(WORD8), pstr_out_cfg->num_out_bytes, g_pf_out);
 -      fflush(g_pf_out);
 +      EM_ASM({
-+        var len = $1;
-+        var chunk = new Uint8Array(HEAPU8.buffer, $0, len).slice();
-+        postMessage({ type: "pcm_chunk", data: chunk }, [chunk.buffer]);
++        if (self.writePcmChunk) self.writePcmChunk($0, $1);
 +      }, pb_out_buf, pstr_out_cfg->num_out_bytes);
 +      /* skip fwrite/fflush to avoid MEMFS output accumulation */
-  #endif
-      }
-
-@@ -771,6 +776,7 @@ IA_ERRORCODE impeghd_main_process(WORD32 argc, pWORD8 argv[])
-      {
-          frame_counter++;
-          fprintf(stderr, "Frames Processed : [%5d] \r", frame_counter);
+ #endif
+     }
+ 
+@@ -771,6 +774,7 @@
+     {
+         frame_counter++;
+         fprintf(stderr, "Frames Processed : [%5d] \r", frame_counter);
 +        EM_ASM({ postMessage({ type: "progress", frame: $0 }); }, frame_counter);
-      }
-
-      ARM_PROFILE_HW_CALC_CYCLES(pstr_out_cfg->num_out_bytes, pstr_in_cfg->ui_pcm_wd_sz,
-@@ -813,6 +819,7 @@ IA_ERRORCODE impeghd_main_process(WORD32 argc, pWORD8 argv[])
-                          pstr_out_cfg->i_samp_freq, pstr_out_cfg->i_num_chan);
-
-    fprintf(stderr, "Frames Processed : [%5d] \n", frame_counter);
+     }
+ 
+     ARM_PROFILE_HW_CALC_CYCLES(pstr_out_cfg->num_out_bytes, pstr_in_cfg->ui_pcm_wd_sz,
+@@ -813,6 +817,7 @@
+                         pstr_out_cfg->i_samp_freq, pstr_out_cfg->i_num_chan);
+ 
+   fprintf(stderr, "Frames Processed : [%5d] \n", frame_counter);
 +  EM_ASM({ postMessage({ type: "progress", frame: $0 }); }, frame_counter);
-    if (!fseek(g_pf_out, 0, SEEK_SET))
-    {
-      err_code = write_wav_header(g_pf_out, i_total_bytes, pstr_out_cfg->i_samp_freq,
+   if (!fseek(g_pf_out, 0, SEEK_SET))
