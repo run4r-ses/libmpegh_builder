@@ -1,3 +1,8 @@
+SPDX-FileCopyrightText: 2020-2023 Ittiam Systems Pvt. Ltd. - Refer to README and LICENSE2 for additional information relating to LICENSE
+SPDX-License-Identifier: BSD-3-Clause-Clear
+
+--- libmpegh/test/impeghd_main.c
++++ libmpegh/test/impeghd_main.c
 @@ -46,6 +45,8 @@
  #include "impeghd_mp4_file_wrapper.h"
  #include "impeghd_config_params.h"

@@ -88,8 +88,9 @@ jobs:
 
       - name: Copy license for compliance
         run: |
-          cp libmpegh/LICENSE libmpegh/bin/
-          cp libmpegh/LICENSE2 libmpegh/bin/
+          cp ittiam/LICENSE libmpegh/bin/
+          cp ittiam/LICENSE2 libmpegh/bin/
+          cp ittiam/README.ittiam.md libmpegh/bin/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -101,4 +102,5 @@ jobs:
             libmpegh/bin/libmpegh_decoder*
             libmpegh/bin/LICENSE
             libmpegh/bin/LICENSE2
+            libmpegh/bin/README.ittiam.md
           retention-days: 90
