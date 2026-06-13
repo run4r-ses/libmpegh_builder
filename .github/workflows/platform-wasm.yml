@@ -27,3 +27,4 @@ jobs:
             -s ALLOW_MEMORY_GROWTH=1 \
             -s INITIAL_MEMORY=4MB"
       override_flags: "-DBUILD_SHARED_LIBS=OFF"
+      postbuild_command: rm -f libia_mpeghd_lib.so

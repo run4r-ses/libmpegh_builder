@@ -30,4 +30,4 @@ jobs:
       artifact_suffix: ${{ matrix.suffix }}
       cmake_command: |
         ${{ matrix.install_cmd }}
-        cmake .. ${{ matrix.cmake_flags }} -DLC_LEVEL_4=ON
+        cmake .. ${{ matrix.cmake_flags }}

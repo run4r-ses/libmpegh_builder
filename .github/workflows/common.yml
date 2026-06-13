@@ -42,9 +42,9 @@ jobs:
         include: >-
           ${{ fromJSON(
             inputs.skip_shared_build 
-            && '[{ "extra_flags": "-DBUILD_SHARED_LIBS=ON", "suffix_ext": "" }]' 
-            || '[{ "extra_flags": "-DBUILD_SHARED_LIBS=ON -DEXECUTABLE_IS_STATIC=OFF", "suffix_ext": "-shared" },
-            { "extra_flags": "-DBUILD_SHARED_LIBS=ON", "suffix_ext": "" }]'
+            && '[{ "extra_flags": "-DLC_LEVEL_4=ON -DBUILD_SHARED_LIBS=ON", "suffix_ext": "" }]' 
+            || '[{ "extra_flags": "-DLC_LEVEL_4=ON -DBUILD_SHARED_LIBS=ON -DEXECUTABLE_IS_STATIC=OFF", "suffix_ext": "-shared" },
+            { "extra_flags": "-DLC_LEVEL_4=ON -DBUILD_SHARED_LIBS=ON", "suffix_ext": "" }]'
           ) }}
     steps:
       - name: Checkout repository
